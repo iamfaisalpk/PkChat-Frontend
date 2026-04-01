@@ -22,7 +22,7 @@ const initialState = {
   debugInfo: "",
   generatedOtpForTest: "",
   user: userFromStorage,
-  isAuthLoaded: !!tokenFromStorage,
+  isAuthLoaded: true, // Optimization: Assume true by default since localStorage check is instant
   token: tokenFromStorage,
   refreshToken: refreshTokenFromStorage,
   sessionExpired: false,
@@ -199,10 +199,6 @@ export const rehydrateAuthFromStorage = () => (dispatch) => {
       refreshToken: refreshToken || null,
     }),
   );
-
-  if (token) {
-    dispatch(fetchMe());
-  }
 };
 
 const authSlice = createSlice({

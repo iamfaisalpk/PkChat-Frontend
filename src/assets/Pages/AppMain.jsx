@@ -189,14 +189,13 @@ const AppMain = () => {
   }, []);
 
   useEffect(() => {
-    dispatch(fetchChats());
-  }, [dispatch]);
-  const { token } = useSelector((s) => s.auth);
-
-  useEffect(() => {
     if (token) {
-      dispatch(fetchMe());
-      dispatch(getBlockedUsers());
+      // Optimization: Fetch core data in parallel
+      Promise.all([
+        dispatch(fetchMe()),
+        dispatch(getBlockedUsers()),
+        dispatch(fetchChats())
+      ]);
     }
   }, [dispatch, token]);
 
