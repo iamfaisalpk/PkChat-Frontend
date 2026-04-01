@@ -163,16 +163,22 @@ const useChatLogic = () => {
 
   /* ── Voice send ── */
   const handleVoiceSend = async (audioBlob, duration, replyToMessageParam) => {
-    if (!selectedChat?._id || !audioBlob) return;
+    if (!selectedChat?._id || !audioBlob || audioBlob.size === 0) {
+      console.warn("Empty or invalid audio blob");
+      return;
+    }
 
-    const voiceFile = new File([audioBlob], `voice-${Date.now()}.webm`, {
+    // Capture the current reply state if not passed explicitly
+    const actualReply = replyToMessageParam || replyToMessage;
+
+    const voiceFile = new File([audioBlob], `voiceNote-${Date.now()}.webm`, {
       type: "audio/webm",
     });
 
     handleSend({
       voiceFile,
       duration,
-      replyToMessage: replyToMessageParam,
+      replyToMessage: actualReply,
     });
   };
 

@@ -126,15 +126,22 @@ const ChatInput = ({
   /* Recording */
   const startRecording = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      mediaRecorderRef.current = new MediaRecorder(stream);
+      // Detect supported mime type for this browser
+      let mimeType = "audio/webm";
+      if (!MediaRecorder.isTypeSupported(mimeType)) {
+        mimeType = MediaRecorder.isTypeSupported("audio/mp4")
+          ? "audio/mp4"
+          : "audio/ogg"; 
+      }
+
+      mediaRecorderRef.current = new MediaRecorder(stream, { mimeType });
       audioChunks.current = [];
       mediaRecorderRef.current.ondataavailable = (ev) => {
         if (ev.data.size > 0) audioChunks.current.push(ev.data);
       };
       mediaRecorderRef.current.onstop = () => {
-        const blob = new Blob(audioChunks.current, { type: "audio/webm" });
-        onVoiceSend(blob, recordTime, replyToMessage);
+        const audioBlob = new Blob(audioChunks.current, { type: mimeType });
+        onVoiceSend(audioBlob, recordTime, replyToMessage);
         setRecordTime(0);
         stream.getTracks().forEach((t) => t.stop());
       };
@@ -145,7 +152,14 @@ const ChatInput = ({
         1000,
       );
     } catch (err) {
-      alert("Microphone access denied or unavailable.");
+      console.error("Microphone Error:", err);
+      if (err.name === 'NotAllowedError') {
+        alert("Microphone permission was denied. Please allow access in your browser settings.");
+      } else if (err.name === 'NotFoundError') {
+        alert("No microphone found. Please connect a recording device.");
+      } else {
+        alert("Microphone access unavailable. Ensure you are using HTTPS if not on localhost.");
+      }
     }
   };
 
@@ -178,7 +192,7 @@ const ChatInput = ({
       style={{
         background: "var(--ig-bg,#000)",
         borderTop: "1px solid rgba(255,255,255,0.08)",
-        padding: "10px 16px 14px",
+        padding: "10px 16px 10px",
         zIndex: 20,
         position: "relative",
       }}
