@@ -137,6 +137,35 @@ const ChatBox = () => {
     });
   }, [messages, searchText]);
 
+  const otherUser = useMemo(() => {
+    if (!selectedChat?.isGroup && selectedChat?.members) {
+      const currentUserId =
+        user?._id || JSON.parse(localStorage.getItem("user") || "{}")._id;
+      return selectedChat.members.find(
+        (m) => m && String(m._id) !== String(currentUserId),
+      );
+    }
+    return null;
+  }, [selectedChat, user]);
+
+  const renderedMessages = useMemo(() => filteredMessages.map((msg, i) => (
+    <MessageBubble
+      key={msg._id || msg.tempId || i}
+      msg={msg}
+      user={user}
+      otherUser={otherUser}
+      replyToMessage={replyToMessage}
+      setReplyToMessage={setReplyToMessage}
+      selectedMessages={selectedMessages}
+      setSelectedMessages={setSelectedMessages}
+      setSelectedUser={setSelectedUser}
+      setInfoPanelType={setInfoPanelType}
+      setViewedMedia={setViewedMedia}
+      onDelete={deleteMessage}
+      onReact={handleReaction}
+    />
+  )), [filteredMessages, user, otherUser, replyToMessage, selectedMessages]);
+
   /* Auto-scroll to bottom when messages change */
   useEffect(() => {
     if (bottomRef.current) {
@@ -152,17 +181,6 @@ const ChatBox = () => {
       bottomRef.current.scrollIntoView({ behavior: "instant" });
     }
   }, [selectedChat?._id]);
-
-  const otherUser = useMemo(() => {
-    if (!selectedChat?.isGroup && selectedChat?.members) {
-      const currentUserId =
-        user?._id || JSON.parse(localStorage.getItem("user") || "{}")._id;
-      return selectedChat.members.find(
-        (m) => m && String(m._id) !== String(currentUserId),
-      );
-    }
-    return null;
-  }, [selectedChat, user]);
 
   /* Ensure selectedChat matches the URL chatId */
   useEffect(() => {
@@ -419,23 +437,7 @@ const ChatBox = () => {
             </div>
 
             {/* Messages */}
-            {useMemo(() => filteredMessages.map((msg, i) => (
-              <MessageBubble
-                key={msg._id || msg.tempId || i}
-                msg={msg}
-                user={user}
-                otherUser={otherUser}
-                replyToMessage={replyToMessage}
-                setReplyToMessage={setReplyToMessage}
-                selectedMessages={selectedMessages}
-                setSelectedMessages={setSelectedMessages}
-                setSelectedUser={setSelectedUser}
-                setInfoPanelType={setInfoPanelType}
-                setViewedMedia={setViewedMedia}
-                onDelete={deleteMessage}
-                onReact={handleReaction}
-              />
-            )), [filteredMessages, user, otherUser, replyToMessage, selectedMessages])}
+            {renderedMessages}
 
             {typingUserId && typingUserId !== user?._id && (
               <div style={{ marginLeft: "8px", marginBottom: "16px" }}>
