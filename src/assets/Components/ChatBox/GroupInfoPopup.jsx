@@ -23,6 +23,7 @@ import {
   AlertTriangle,
   ChevronDown,
   Info,
+  ArrowLeft,
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { motion, AnimatePresence } from "framer-motion";
@@ -191,16 +192,16 @@ const GroupInfoPopup = ({ chat, onClose, onUpdate }) => {
   return (
     <div className="flex flex-col h-full bg-[var(--ig-bg)] border-l border-[var(--ig-border)]">
       {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--ig-secondary-bg)]">
-        <h2 className="text-sm font-bold text-[var(--ig-text-primary)] uppercase tracking-widest">
-          Group Info
-        </h2>
+      <div className="flex items-center gap-4 px-4 py-4 border-b border-[var(--ig-secondary-bg)]">
         <button
           onClick={onClose}
           className="p-2 hover:bg-[var(--ig-secondary-bg)] rounded-xl text-[var(--ig-text-secondary)] hover:text-[var(--ig-text-primary)] transition-all"
         >
-          <X size={20} />
+          {window.innerWidth < 768 ? <ArrowLeft size={22} /> : <X size={20} />}
         </button>
+        <h2 className="text-sm font-bold text-[var(--ig-text-primary)] uppercase tracking-widest">
+          Group Info
+        </h2>
       </div>
 
       <div className="flex-1 overflow-y-auto custom-scrollbar">

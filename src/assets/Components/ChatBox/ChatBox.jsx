@@ -29,11 +29,14 @@ import { MessageSquare, ArrowLeft } from "lucide-react";
 /* ── Inject shared IG styles once ── */
 const igChatStyles = `
   .ig-chat-bg { background: var(--ig-bg, #000); }
+  
+  @keyframes spin { to { transform: rotate(360deg); } }
 
   .chat-scroll-area {
     overflow-y: auto;
     height: 100%;
     scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
   }
   .chat-scroll-area::-webkit-scrollbar { width: 4px; }
   .chat-scroll-area::-webkit-scrollbar-track { background: transparent; }
@@ -53,6 +56,24 @@ const igChatStyles = `
     padding: 2px;
     border-radius: 50%;
     display: inline-block;
+  }
+
+  @media (max-width: 768px) {
+    .ig-info-panel {
+      position: fixed !important;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      width: 100% !important;
+      height: 100% !important;
+      z-index: 1000 !important;
+      border-left: none !important;
+    }
+    
+    .chat-scroll-area {
+      scroll-behavior: auto; /* Faster on mobile */
+    }
   }
 `;
 
@@ -119,7 +140,9 @@ const ChatBox = () => {
   /* Auto-scroll to bottom when messages change */
   useEffect(() => {
     if (bottomRef.current) {
-      bottomRef.current.scrollIntoView({ behavior: "smooth" });
+      // Use 'auto' on mobile for better performance, 'smooth' on desktop
+      const behavior = window.innerWidth < 768 ? "auto" : "smooth";
+      bottomRef.current.scrollIntoView({ behavior });
     }
   }, [filteredMessages.length, typingUserId]);
 
@@ -396,7 +419,7 @@ const ChatBox = () => {
             </div>
 
             {/* Messages */}
-            {filteredMessages.map((msg, i) => (
+            {useMemo(() => filteredMessages.map((msg, i) => (
               <MessageBubble
                 key={msg._id || msg.tempId || i}
                 msg={msg}
@@ -412,7 +435,7 @@ const ChatBox = () => {
                 onDelete={deleteMessage}
                 onReact={handleReaction}
               />
-            ))}
+            )), [filteredMessages, user, otherUser, replyToMessage, selectedMessages])}
 
             {typingUserId && typingUserId !== user?._id && (
               <div style={{ marginLeft: "8px", marginBottom: "16px" }}>
@@ -457,7 +480,7 @@ const ChatBox = () => {
               flexShrink: 0,
               overflowY: "auto",
             }}
-            className="no-scrollbar"
+            className="no-scrollbar ig-info-panel"
           >
             {showUserInfoState ? (
               <UserInfoPopup
