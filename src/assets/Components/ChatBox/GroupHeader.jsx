@@ -31,7 +31,12 @@ const GroupHeader = ({
 
     return [
       ...new Map(
-        selectedChat.members.filter((m) => m && m._id).map((m) => [m._id, m]),
+        selectedChat.members
+          .filter((m) => m)
+          .map((m) => {
+            const id = m._id || m;
+            return [id, m];
+          }),
       ).values(),
     ];
   }, [selectedChat?.members]);

@@ -410,7 +410,11 @@ const ChatBox = () => {
                   marginBottom: "12px",
                 }}
               >
-                {otherUser?.isOnline ? "● Online" : "Offline"}
+                {selectedChat?.isGroup
+                  ? `${selectedChat.members?.length || 0} members`
+                  : otherUser?.isOnline
+                    ? "● Online"
+                    : "Offline"}
               </p>
               <button
                 onClick={() => dispatch(showUserInfo())}

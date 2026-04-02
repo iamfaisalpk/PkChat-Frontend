@@ -94,7 +94,7 @@ const ChatHeader = ({
               )}
               <span className="text-[12px] text-[var(--ig-text-secondary)] font-medium truncate">
                 {isGroup
-                  ? `${selectedChat.participants?.length || 0} members`
+                  ? `${selectedChat.members?.length || 0} members`
                   : isOnline
                     ? "Active now"
                     : formatLastSeen(otherUser?.lastSeen)}
