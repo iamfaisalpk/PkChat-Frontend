@@ -579,7 +579,7 @@ const UserProfile = () => {
                   margin: 0,
                 }}
               >
-                +{user?.phone || user?.phoneNumber || "Connected"}
+                {user?.phone || user?.phoneNumber || "Connected"}
               </p>
             </div>
           </div>
