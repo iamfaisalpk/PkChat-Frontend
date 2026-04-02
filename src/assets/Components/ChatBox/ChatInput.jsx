@@ -126,6 +126,8 @@ const ChatInput = ({
   /* Recording */
   const startRecording = async () => {
     try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
       // Detect supported mime type for this browser
       let mimeType = "audio/webm";
       if (!MediaRecorder.isTypeSupported(mimeType)) {
@@ -140,9 +142,13 @@ const ChatInput = ({
         if (ev.data.size > 0) audioChunks.current.push(ev.data);
       };
       mediaRecorderRef.current.onstop = () => {
-        const audioBlob = new Blob(audioChunks.current, { type: mimeType });
-        onVoiceSend(audioBlob, recordTime, replyToMessage);
+        setIsRecording(false); // Make sure we set this to false!
+        if (audioChunks.current.length > 0) {
+          const audioBlob = new Blob(audioChunks.current, { type: mimeType });
+          onVoiceSend(audioBlob, recordTime, replyToMessage);
+        }
         setRecordTime(0);
+        audioChunks.current = [];
         stream.getTracks().forEach((t) => t.stop());
       };
       mediaRecorderRef.current.start();
@@ -192,7 +198,7 @@ const ChatInput = ({
       style={{
         background: "var(--ig-bg,#000)",
         borderTop: "1px solid rgba(255,255,255,0.08)",
-        padding: "10px 16px 10px",
+        padding: "10px 16px calc(10px + env(safe-area-inset-bottom))",
         zIndex: 20,
         position: "relative",
       }}
@@ -540,6 +546,8 @@ const ChatInput = ({
                 {hasContent && (
                   <button
                     onClick={onSend}
+                    onMouseDown={(e) => e.preventDefault()}
+                    onTouchStart={(e) => e.preventDefault()}
                     style={{
                       background: "linear-gradient(135deg,#dc2743,#bc1888)",
                       border: "none",
@@ -713,7 +721,10 @@ const ChatInput = ({
                 Discard
               </button>
               <button
-                onClick={stopRecording}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  stopRecording();
+                }}
                 style={{
                   background: "#fff",
                   border: "none",

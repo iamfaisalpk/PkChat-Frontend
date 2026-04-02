@@ -5,8 +5,17 @@ import tailwindcss from '@tailwindcss/vite';
 import path from "path";
 
 export default defineConfig({
-  base: "/",
+  base: process.env.NODE_ENV === "production" ? "/WhatsApp-Frontend/" : "/",
   plugins: [react(), tailwindcss()],
+  server: {
+    proxy: {
+      "/api": {
+        target: "http://localhost:5000",
+        changeOrigin: true,
+        secure: false,
+      },
+    },
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

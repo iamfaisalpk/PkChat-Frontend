@@ -563,7 +563,7 @@ const ProfileTab = () => {
             margin: 0,
           }}
         >
-          {user?.phone ? `+${user.phone}` : "—"}
+          {user?.phone ? `${user.phone}` : "—"}
         </p>
         <p style={{ color: S.muted, fontSize: "11px", margin: "4px 0 0" }}>
           Your phone number is not visible to others

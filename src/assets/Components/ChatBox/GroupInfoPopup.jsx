@@ -158,6 +158,36 @@ const GroupInfoPopup = ({ chat, onClose, onUpdate }) => {
     }
   };
 
+  const handleAvatarUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > MAX_FILE_SIZE) {
+      toast.error("Image must be less than 5MB");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("groupAvatar", file);
+
+    setIsLoading(true);
+    const loadingToast = toast.loading("Updating group icon...");
+
+    try {
+      const res = await axios.put(`/api/chat/group-avatar/${chat._id}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      dispatch(fetchChats());
+      if (onUpdate) onUpdate(res.data);
+      toast.success("Group icon updated", { id: loadingToast });
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to update icon", { id: loadingToast });
+    } finally {
+      setIsLoading(false);
+      e.target.value = "";
+    }
+  };
+
   const handleDeleteGroupForever = async () => {
     if (
       !window.confirm(
@@ -195,7 +225,7 @@ const GroupInfoPopup = ({ chat, onClose, onUpdate }) => {
       <div className="flex items-center gap-4 px-4 py-4 border-b border-[var(--ig-secondary-bg)]">
         <button
           onClick={onClose}
-          className="p-2 hover:bg-[var(--ig-secondary-bg)] rounded-xl text-[var(--ig-text-secondary)] hover:text-[var(--ig-text-primary)] transition-all"
+          className="p-2 hover:bg-[var(--ig-secondary-bg)] cursor-pointer rounded-xl text-[var(--ig-text-secondary)] hover:text-[var(--ig-text-primary)] transition-all"
         >
           {window.innerWidth < 768 ? <ArrowLeft size={22} /> : <X size={20} />}
         </button>
@@ -210,15 +240,34 @@ const GroupInfoPopup = ({ chat, onClose, onUpdate }) => {
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="avatar-ring p-1 mb-6"
+            className="avatar-ring p-1 mb-6 relative group"
           >
-            <div className="w-40 h-40 rounded-full overflow-hidden border-4 border-[var(--ig-bg)] shadow-2xl">
+            <div className="w-40 h-40 rounded-full overflow-hidden border-4 border-[var(--ig-bg)] shadow-2xl relative">
               <img
                 src={chat.groupAvatar || "/WhatsApp.jpg"}
                 alt=""
                 className="w-full h-full object-cover"
               />
+              {isGroupAdmin && (
+                <div 
+                  className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity"
+                  onClick={() => document.getElementById("update-avatar-input").click()}
+                >
+                  <Camera size={24} className="text-white mb-1" />
+                  <span className="text-white text-xs font-semibold">CHANGE</span>
+                </div>
+              )}
             </div>
+            {isGroupAdmin && (
+              <input
+                type="file"
+                id="update-avatar-input"
+                className="hidden"
+                accept="image/*"
+                onChange={handleAvatarUpload}
+                disabled={isLoading}
+              />
+            )}
           </motion.div>
           <h3 className="text-xl font-bold text-[var(--ig-text-primary)] mb-1">
             {chat.groupName}

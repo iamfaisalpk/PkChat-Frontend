@@ -48,10 +48,6 @@ const ModernAuth = () => {
     return digits.length >= dialDigits.length + 8 && digits.length <= 15;
   }, [phoneNumber, isoCode, countryCode]);
 
-  // Only redirect once auth is fully loaded AND both user + token are confirmed.
-  // Guarding with isAuthLoaded + token prevents the loop where user is loaded
-  // from localStorage but token is null (inconsistent startup state), which
-  // caused ProtectedRoute to bounce straight back to /auth.
   if (isAuthLoaded && user && token) return <Navigate to="/app" replace />;
 
   const handlePhoneSubmit = async (e) => {
@@ -130,6 +126,178 @@ const ModernAuth = () => {
         boxSizing: "border-box",
       }}
     >
+      {/* ── Global styles: spin + country modal dropdown ── */}
+      <style>{`
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+        * { box-sizing: border-box; }
+
+        input[type="text"]:focus {
+          border-color: rgba(193,53,132,0.6) !important;
+          background: rgba(193,53,132,0.08) !important;
+          box-shadow: 0 0 0 3px rgba(193,53,132,0.1) !important;
+        }
+
+        /* ── Flag button ── */
+        .react-tel-input .flag-dropdown {
+          background: transparent !important;
+          border: none !important;
+        }
+        .react-tel-input .selected-flag {
+          background: transparent !important;
+          border-right: 1px solid rgba(255,255,255,0.08) !important;
+          transition: background 0.15s ease !important;
+        }
+        .react-tel-input .selected-flag:hover,
+        .react-tel-input .selected-flag:focus {
+          background: rgba(255,255,255,0.06) !important;
+        }
+        .react-tel-input .flag-dropdown.open .selected-flag {
+          background: rgba(255,255,255,0.08) !important;
+        }
+
+        /* ── Backdrop when open ── */
+        .react-tel-input .flag-dropdown.open::before {
+          content: '';
+          position: fixed;
+          inset: 0;
+          background: rgba(0,0,0,0.72);
+          backdrop-filter: blur(6px);
+          -webkit-backdrop-filter: blur(6px);
+          z-index: 998;
+          pointer-events: none;
+          animation: fadeInBackdrop 0.2s ease forwards;
+        }
+        @keyframes fadeInBackdrop {
+          from { opacity: 0; }
+          to   { opacity: 1; }
+        }
+
+        /* ── Modal panel ── */
+        .react-tel-input .country-list {
+          position: fixed !important;
+          top: 50% !important;
+          left: 50% !important;
+          transform: translate(-50%, -48%) !important;
+          width: min(420px, 92vw) !important;
+          max-height: 68vh !important;
+          background: #141414 !important;
+          border: 1px solid rgba(255,255,255,0.10) !important;
+          border-radius: 20px !important;
+          box-shadow:
+            0 0 0 1px rgba(255,255,255,0.04),
+            0 32px 80px rgba(0,0,0,0.85),
+            0 8px 24px rgba(0,0,0,0.60) !important;
+          overflow: hidden !important;
+          z-index: 999 !important;
+          padding: 0 !important;
+          margin: 0 !important;
+          animation: popIn 0.22s cubic-bezier(0.34, 1.4, 0.64, 1) forwards !important;
+        }
+        @keyframes popIn {
+          from {
+            opacity: 0;
+            transform: translate(-50%, -46%) scale(0.94);
+          }
+          to {
+            opacity: 1;
+            transform: translate(-50%, -48%) scale(1);
+          }
+        }
+
+        /* ── Modal title header ── */
+        .react-tel-input .country-list::before {
+          content: 'Select Country';
+          display: block;
+          color: rgba(255,255,255,0.9);
+          font-size: 15px;
+          font-weight: 700;
+          letter-spacing: 0.02em;
+          padding: 18px 20px 12px;
+          border-bottom: 1px solid rgba(255,255,255,0.06);
+          background: #141414;
+          position: sticky;
+          top: 0;
+          z-index: 1;
+        }
+
+        /* ── Search wrapper ── */
+        .react-tel-input .country-list .search {
+          background: #141414 !important;
+          padding: 12px 16px 10px !important;
+          border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+          position: sticky !important;
+          top: 52px !important;
+          z-index: 1 !important;
+        }
+
+        /* ── Search input ── */
+        .react-tel-input .country-list .search-box {
+          background: rgba(255,255,255,0.05) !important;
+          border: 1px solid rgba(255,255,255,0.10) !important;
+          color: #fff !important;
+          width: 100% !important;
+          border-radius: 10px !important;
+          padding: 9px 14px !important;
+          font-size: 13.5px !important;
+          outline: none !important;
+          transition: border-color 0.2s ease !important;
+        }
+        .react-tel-input .country-list .search-box:focus {
+          border-color: rgba(193,53,132,0.5) !important;
+          background: rgba(255,255,255,0.07) !important;
+        }
+        .react-tel-input .country-list .search-box::placeholder {
+          color: rgba(255,255,255,0.28) !important;
+        }
+
+        /* ── Country rows ── */
+        .react-tel-input .country-list .country {
+          padding: 11px 18px !important;
+          display: flex !important;
+          align-items: center !important;
+          gap: 10px !important;
+          color: rgba(255,255,255,0.80) !important;
+          font-size: 13.5px !important;
+          cursor: pointer !important;
+          transition: background 0.12s ease !important;
+        }
+        .react-tel-input .country-list .country:hover {
+          background: rgba(255,255,255,0.07) !important;
+          color: #fff !important;
+        }
+        .react-tel-input .country-list .country.highlight {
+          background: rgba(193,53,132,0.12) !important;
+          color: #fff !important;
+        }
+
+        /* ── Dial code (right side) ── */
+        .react-tel-input .country-list .country .dial-code {
+          color: rgba(255,255,255,0.32) !important;
+          font-size: 12px !important;
+          margin-left: auto !important;
+        }
+
+        /* ── Divider ── */
+        .react-tel-input .country-list .divider {
+          border-color: rgba(255,255,255,0.06) !important;
+          margin: 4px 0 !important;
+        }
+
+        /* ── Scrollbar ── */
+        .react-tel-input .country-list::-webkit-scrollbar { width: 4px; }
+        .react-tel-input .country-list::-webkit-scrollbar-track { background: transparent; }
+        .react-tel-input .country-list::-webkit-scrollbar-thumb {
+          background: rgba(255,255,255,0.12);
+          border-radius: 99px;
+        }
+
+        .react-tel-input input::placeholder {
+          color: rgba(255,255,255,0.2) !important;
+        }
+      `}</style>
+
       {/* Instagram-style gradient blobs */}
       <div
         style={{
@@ -301,6 +469,8 @@ const ModernAuth = () => {
                       dispatch(setCountryCode("+" + country.dialCode));
                       dispatch(setIsoCode(country.countryCode));
                     }}
+                    enableSearch
+                    searchPlaceholder="Search country..."
                     containerStyle={{ width: "100%" }}
                     inputStyle={{
                       width: "100%",
@@ -671,29 +841,6 @@ const ModernAuth = () => {
           </p>
         </div>
       </motion.div>
-
-      <style>{`
-        @keyframes spin {
-          to { transform: rotate(360deg); }
-        }
-        * { box-sizing: border-box; }
-        input[type="text"]:focus {
-          border-color: rgba(193,53,132,0.6) !important;
-          background: rgba(193,53,132,0.08) !important;
-          box-shadow: 0 0 0 3px rgba(193,53,132,0.1) !important;
-        }
-        .react-tel-input .flag-dropdown {
-          background: transparent !important;
-          border: none !important;
-        }
-        .react-tel-input .selected-flag:hover,
-        .react-tel-input .selected-flag:focus {
-          background: rgba(255,255,255,0.05) !important;
-        }
-        .react-tel-input input::placeholder {
-          color: rgba(255,255,255,0.2) !important;
-        }
-      `}</style>
     </div>
   );
 };

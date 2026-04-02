@@ -91,61 +91,233 @@ const PhoneInputComponent = ({ setStep }) => {
   );
 
   return (
-    <div className="min-h-screen bg-[#f0f2f5] flex flex-col items-center justify-center p-4">
-      <div className="flex items-center justify-center mb-8">
-        <div className="w-12 h-12 mr-3 bg-white rounded-xl shadow-sm overflow-hidden flex items-center justify-center">
-          <img
-            src="/WhatsApp.svg.png"
-            alt=""
-            className="w-10 h-10 object-contain"
-          />
-        </div>
-        <h1 className="text-4xl font-light text-gray-800">PK.Chat</h1>
-      </div>
+    <div className="min-h-screen bg-black flex flex-col items-center justify-center p-4">
+      <style>{`
+        /* ── Overlay backdrop when dropdown opens ── */
+        .custom-phone-input .flag-dropdown.open::before {
+          content: '';
+          position: fixed;
+          inset: 0;
+          background: rgba(0, 0, 0, 0.70);
+          backdrop-filter: blur(6px);
+          -webkit-backdrop-filter: blur(6px);
+          z-index: 998;
+          pointer-events: none;
+          animation: fadeInBackdrop 0.2s ease forwards;
+        }
 
-      {/* Download Banner */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6 w-full max-w-md flex items-center justify-between">
-        <div>
-          <p className="text-gray-800 font-medium text-sm">
-            Download PK.Chat for Windows
-          </p>
-          <p className="text-gray-500 text-xs mt-1">
-            Make calls, share your screen and get a faster experience when you
-            download the Windows app.
-          </p>
+        @keyframes fadeInBackdrop {
+          from { opacity: 0; }
+          to   { opacity: 1; }
+        }
+
+        /* ── Flag button styles ── */
+        .custom-phone-input .selected-flag {
+          background-color: transparent !important;
+          border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+          padding: 0 12px !important;
+          display: flex !important;
+          align-items: center !important;
+          gap: 6px !important;
+          transition: background 0.15s ease !important;
+        }
+
+        .custom-phone-input .selected-flag:hover,
+        .custom-phone-input .selected-flag:focus {
+          background-color: rgba(255, 255, 255, 0.06) !important;
+        }
+
+        .custom-phone-input .flag-dropdown.open .selected-flag {
+          background-color: rgba(255, 255, 255, 0.08) !important;
+        }
+
+        /* ── Dropdown modal panel ── */
+        .custom-phone-input .country-list {
+          position: fixed !important;
+          top: 50% !important;
+          left: 50% !important;
+          transform: translate(-50%, -48%) !important;
+          width: min(420px, 92vw) !important;
+          max-height: 68vh !important;
+          background: #141414 !important;
+          border: 1px solid rgba(255, 255, 255, 0.10) !important;
+          border-radius: 20px !important;
+          box-shadow:
+            0 0 0 1px rgba(255,255,255,0.04),
+            0 32px 80px rgba(0, 0, 0, 0.80),
+            0 8px 24px rgba(0, 0, 0, 0.60) !important;
+          overflow: hidden !important;
+          z-index: 999 !important;
+          animation: popIn 0.22s cubic-bezier(0.34, 1.4, 0.64, 1) forwards !important;
+          padding: 0 !important;
+          margin: 0 !important;
+        }
+
+        @keyframes popIn {
+          from {
+            opacity: 0;
+            transform: translate(-50%, -46%) scale(0.94);
+          }
+          to {
+            opacity: 1;
+            transform: translate(-50%, -48%) scale(1);
+          }
+        }
+
+        /* ── Modal header strip ── */
+        .custom-phone-input .country-list::before {
+          content: 'Select Country';
+          display: block;
+          color: rgba(255,255,255,0.9);
+          font-size: 15px;
+          font-weight: 700;
+          letter-spacing: 0.02em;
+          padding: 18px 20px 12px;
+          border-bottom: 1px solid rgba(255,255,255,0.06);
+          background: #141414;
+          position: sticky;
+          top: 0;
+          z-index: 1;
+        }
+
+        /* ── Search bar wrapper ── */
+        .custom-phone-input .country-list .search {
+          background: #141414 !important;
+          padding: 12px 16px 10px !important;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+          position: sticky !important;
+          top: 52px !important;
+          z-index: 1 !important;
+        }
+
+        /* ── Search input ── */
+        .custom-phone-input .country-list .search-box {
+          background: rgba(255, 255, 255, 0.05) !important;
+          border: 1px solid rgba(255, 255, 255, 0.10) !important;
+          color: #fff !important;
+          width: 100% !important;
+          border-radius: 10px !important;
+          padding: 9px 14px !important;
+          font-size: 13.5px !important;
+          outline: none !important;
+          transition: border-color 0.2s ease !important;
+        }
+
+        .custom-phone-input .country-list .search-box:focus {
+          border-color: rgba(220, 39, 67, 0.5) !important;
+          background: rgba(255, 255, 255, 0.07) !important;
+        }
+
+        .custom-phone-input .country-list .search-box::placeholder {
+          color: rgba(255, 255, 255, 0.30) !important;
+        }
+
+        /* ── Country list items ── */
+        .custom-phone-input .country-list .country {
+          padding: 11px 18px !important;
+          display: flex !important;
+          align-items: center !important;
+          gap: 10px !important;
+          color: rgba(255, 255, 255, 0.80) !important;
+          font-size: 13.5px !important;
+          cursor: pointer !important;
+          transition: background 0.12s ease !important;
+          border-radius: 0 !important;
+        }
+
+        .custom-phone-input .country-list .country:hover {
+          background: rgba(255, 255, 255, 0.07) !important;
+          color: #fff !important;
+        }
+
+        .custom-phone-input .country-list .country.highlight {
+          background: rgba(220, 39, 67, 0.12) !important;
+          color: #fff !important;
+        }
+
+        /* Dial code muted text */
+        .custom-phone-input .country-list .country .dial-code {
+          color: rgba(255, 255, 255, 0.35) !important;
+          font-size: 12px !important;
+          margin-left: auto !important;
+        }
+
+        /* Divider between preferred & full list */
+        .custom-phone-input .country-list .divider {
+          border-color: rgba(255, 255, 255, 0.06) !important;
+          margin: 4px 0 !important;
+        }
+
+        /* Scrollbar */
+        .custom-phone-input .country-list::-webkit-scrollbar {
+          width: 4px;
+        }
+        .custom-phone-input .country-list::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .custom-phone-input .country-list::-webkit-scrollbar-thumb {
+          background: rgba(255, 255, 255, 0.12);
+          border-radius: 99px;
+        }
+      `}</style>
+
+      <div className="flex flex-col items-center justify-center mb-8">
+        <div style={{
+          width: "72px",
+          height: "72px",
+          background: "linear-gradient(135deg,#f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%)",
+          borderRadius: "50%",
+          padding: "2px",
+          marginBottom: "16px"
+        }}>
+          <div style={{
+            width: "100%",
+            height: "100%",
+            background: "#000",
+            borderRadius: "50%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center"
+          }}>
+            <img
+              src="/WhatsApp.svg.png"
+              alt=""
+              className="w-10 h-10 object-contain drop-shadow-md"
+            />
+          </div>
         </div>
-        <button className="bg-[#25d366] hover:bg-[#20c659] text-white font-medium px-4 py-1 rounded-full text-xs transition-colors">
-          Download
-        </button>
+        <h1 className="text-3xl font-extrabold text-white tracking-tight">PK.Chat</h1>
       </div>
 
       {/* Phone Input Box */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 w-full max-w-md">
-        <h2 className="text-xl text-gray-800 font-light mb-2 text-center">
-          Enter phone number
+      <div className="bg-[#111111] rounded-2xl shadow-2xl border border-white/5 p-8 w-full max-w-md">
+        <h2 className="text-2xl text-white font-bold mb-2 text-center tracking-tight">
+          Welcome to PK.Chat
         </h2>
-        <p className="text-xs text-gray-500 text-center mb-4">
-          Select a country and enter your phone number.
+        <p className="text-sm text-gray-400 text-center mb-8">
+          Pick your country and enter your phone number to continue.
         </p>
 
-        <PhoneInput
-          country={"in"}
-          value={phoneNumber}
-          onChange={handlePhoneChange}
-          inputClass="!w-full !p-3 !text-base !border !border-gray-300 !rounded-md focus:!border-[#25d366] focus:!ring-0 !outline-none"
-          buttonClass="!bg-white !border !border-gray-300 !rounded-l hover:!bg-gray-100"
-          dropdownClass="!bg-white !border !border-gray-300 !shadow-md !rounded"
-          placeholder="Phone number"
-          enableSearch
-          searchPlaceholder="Search"
-          countryCodeEditable={false}
-          autoFormat={true}
-          disableDropdown={false}
-        />
+        <div className="custom-phone-input mb-2">
+          <PhoneInput
+            country={"in"}
+            value={phoneNumber}
+            onChange={handlePhoneChange}
+            inputClass="!w-full !pl-[60px] !pr-4 !py-4 !text-base !bg-[#000] !border !border-white/10 !rounded-xl !text-white focus:!border-[#e1306c] focus:!ring-0 !outline-none !transition-colors"
+            buttonClass="!bg-transparent !border-none !rounded-l-xl hover:!bg-white/5 !transition-colors"
+            dropdownClass="!bg-[#1a1a1a] !border !border-white/10 !shadow-2xl !rounded-xl"
+            placeholder="Phone number"
+            enableSearch
+            searchPlaceholder="Search country..."
+            countryCodeEditable={false}
+            autoFormat={true}
+            disableDropdown={false}
+          />
+        </div>
 
         {/* Debug info - only show when needed */}
         {import.meta.env.NODE_ENV === "development" && phoneNumber && (
-          <div className="text-xs text-gray-400 mt-1">
+          <div className="text-xs text-gray-500 mt-2 mb-2">
             Debug: Length {phoneNumber.replace(/\D/g, "").length} | Valid:{" "}
             {isValidPhone ? "✅" : "❌"}
           </div>
@@ -153,8 +325,8 @@ const PhoneInputComponent = ({ setStep }) => {
 
         {/* Error Message */}
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-md p-2 mt-2">
-            <p className="text-red-600 text-xs text-center">{error}</p>
+          <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-3 mt-4">
+            <p className="text-red-400 text-sm font-medium text-center">{error}</p>
           </div>
         )}
 
@@ -162,16 +334,21 @@ const PhoneInputComponent = ({ setStep }) => {
         <button
           onClick={handlePhoneSubmit}
           disabled={loading || !isValidPhone}
-          className="w-full bg-[#25d366] hover:bg-[#20c659] disabled:bg-gray-300 disabled:cursor-not-allowed text-white py-3 rounded-full font-medium text-base flex items-center justify-center mt-4 transition-colors"
+          style={{
+            background: loading || !isValidPhone ? "rgba(255,255,255,0.1)" : "linear-gradient(135deg,#dc2743,#bc1888)"
+          }}
+          className={`w-full py-4 rounded-xl font-bold text-[15px] flex items-center justify-center mt-8 transition-all duration-200 ${
+            loading || !isValidPhone ? "text-gray-500 cursor-not-allowed" : "text-white hover:opacity-90 hover:scale-[1.02] shadow-[0_8px_24px_rgba(225,48,108,0.25)]"
+          }`}
         >
           {loading ? (
             <div className="flex items-center">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
               Sending OTP...
             </div>
           ) : (
             <>
-              Next <FaArrowRight className="ml-2 text-sm" />
+              Continue <FaArrowRight className="ml-2 text-sm" />
             </>
           )}
         </button>
@@ -179,26 +356,26 @@ const PhoneInputComponent = ({ setStep }) => {
         {/* QR Code Login */}
         <button
           onClick={() => setStep("qr")}
-          className="block mx-auto mt-4 text-[#25d366] hover:text-[#20c659] text-xs font-medium cursor-pointer transition-colors"
+          className="block mx-auto mt-6 text-gray-400 hover:text-white text-sm font-semibold cursor-pointer transition-colors"
         >
-          Log in with QR code
+          Log in with QR code instead
         </button>
       </div>
 
       {/* Footer */}
-      <div className="mt-6 text-center text-xs text-gray-500">
-        <p>
+      <div className="mt-8 text-center text-xs text-gray-500">
+        <p className="mb-3">
           Don&apos;t have a PK.Chat account?{" "}
           <Link
             to="/signup"
-            className="text-[#25d366] hover:underline font-medium"
+            className="text-[#e1306c] hover:text-[#bc1888] font-bold transition-colors"
           >
-            Get started
+            Create one
           </Link>
         </p>
-        <div className="flex items-center justify-center mt-2">
-          <FaLock className="mr-1" />
-          <span>Your personal messages are end-to-end encrypted</span>
+        <div className="flex items-center justify-center text-gray-600 bg-white/5 py-2 px-4 rounded-full w-fit mx-auto">
+          <FaLock className="mr-2" size={10} />
+          <span className="font-medium">End-to-end encrypted</span>
         </div>
       </div>
     </div>

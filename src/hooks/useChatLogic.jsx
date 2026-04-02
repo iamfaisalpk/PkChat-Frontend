@@ -163,6 +163,11 @@ const useChatLogic = () => {
 
   /* ── Voice send ── */
   const handleVoiceSend = async (audioBlob, duration, replyToMessageParam) => {
+    console.log("🎤 handleVoiceSend called", { 
+      blobSize: audioBlob?.size, 
+      duration, 
+      chatId: selectedChat?._id 
+    });
     if (!selectedChat?._id || !audioBlob || audioBlob.size === 0) {
       console.warn("Empty or invalid audio blob");
       return;
@@ -269,6 +274,9 @@ const useChatLogic = () => {
     // Clear inputs immediately for responsive UX
     const sentText = newMessage;
     const sentMedia = mediaFile;
+    const sentVoice = voiceFile;
+    const sentDuration = duration;
+
     setNewMessage("");
     setMediaFile(null);
     setVoiceNoteFile(null);
@@ -279,8 +287,8 @@ const useChatLogic = () => {
     formData.append("conversationId", selectedChat._id);
     if (sentText) formData.append("text", sentText);
     if (sentMedia) formData.append("media", sentMedia);
-    if (voiceFile) formData.append("voiceNote", voiceFile);
-    if (duration) formData.append("duration", duration.toString());
+    if (sentVoice) formData.append("voiceNote", sentVoice);
+    if (sentDuration) formData.append("duration", sentDuration.toString());
     if (replyParam?._id) formData.append("replyTo", replyParam._id);
     formData.append("tempId", tempId);
 

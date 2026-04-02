@@ -16,7 +16,7 @@ import {
   Pin,
   Users,
   UserCircle,
-  MoreHorizontal,
+  ChevronDown,
   MessageSquare,
 } from "lucide-react";
 import {
@@ -371,7 +371,7 @@ const ChatList = ({ activeTab }) => {
                 </div>
               </div>
 
-              {/* 3-dot menu */}
+              {/* Dropdown menu trigger */}
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -380,17 +380,18 @@ const ChatList = ({ activeTab }) => {
                 style={{
                   background: "none",
                   border: "none",
-                  color: "rgba(255,255,255,0.3)",
+                  color: "rgba(255,255,255,0.4)",
                   cursor: "pointer",
                   padding: "4px",
                   borderRadius: "8px",
-                  opacity: 0,
-                  transition: "opacity 0.15s",
+                  transition: "opacity 0.15s, color 0.15s",
                   flexShrink: 0,
                 }}
                 className="chat-menu-btn"
+                onMouseEnter={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.8)")}
+                onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.4)")}
               >
-                <MoreHorizontal size={18} />
+                <ChevronDown size={20} />
               </button>
 
               {/* Dropdown */}
