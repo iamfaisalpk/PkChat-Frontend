@@ -63,7 +63,7 @@ const App = () => {
       connectSocket(token);
 
       const handleConnect = () => {
-        console.log(" Socket connected:", socket.id);
+        // console.log(" Socket connected:", socket.id);
       };
       const handleDisconnect = () => {
         console.log("Socket disconnected");
