@@ -48,7 +48,6 @@ const ModernAuth = () => {
     return digits.length >= dialDigits.length + 8 && digits.length <= 15;
   }, [phoneNumber, isoCode, countryCode]);
 
-  if (isAuthLoaded && user && token) return <Navigate to="/app" replace />;
 
   const handlePhoneSubmit = async (e) => {
     e.preventDefault();
@@ -81,6 +80,8 @@ const ModernAuth = () => {
     }
     return () => clearInterval(interval);
   }, [resendTimer]);
+
+  if (isAuthLoaded && user && token) return <Navigate to="/app" replace />;
 
   const handleResendOtp = async () => {
     try {
