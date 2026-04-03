@@ -294,7 +294,6 @@ const ChatBox = () => {
           flex: 1,
           minWidth: 0,
           zIndex: 10,
-          height: "100%",
         }}
       >
         {/* Header */}

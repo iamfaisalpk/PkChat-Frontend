@@ -47,9 +47,10 @@ body {
   background: var(--ig-bg);
   color: var(--ig-text-primary);
   overflow: hidden;
-  height: 100vh;
+  height: 100dvh; /* Use dynamic viewport height for mobile browsers */
   width: 100vw;
   transition: background-color 0.3s ease, color 0.3s ease;
+  overscroll-behavior-y: none; /* Prevent pull-to-refresh on mobile */
 }
 
 ::selection {
@@ -79,7 +80,7 @@ body {
 /* Responsive Grid/Layout Utilities */
 .app-container {
   display: flex;
-  height: 100vh;
+  height: 100dvh;
   width: 100vw;
   background: var(--ig-bg);
 }

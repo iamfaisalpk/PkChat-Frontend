@@ -198,7 +198,8 @@ const ChatInput = ({
       style={{
         background: "var(--ig-bg,#000)",
         borderTop: "1px solid rgba(255,255,255,0.08)",
-        padding: "10px 16px calc(10px + env(safe-area-inset-bottom))",
+        padding: "10px 16px",
+        paddingBottom: "calc(10px + env(safe-area-inset-bottom))",
         zIndex: 20,
         position: "relative",
       }}

@@ -55,7 +55,13 @@ const ChatHeader = ({
   };
 
   return (
-    <div className="flex items-center justify-between px-4 py-3 bg-[var(--ig-bg)] border-b border-[var(--ig-border)] z-30 transition-colors duration-300 h-[68px] sticky top-0">
+    <div 
+      className="flex items-center justify-between px-4 py-3 bg-[var(--ig-bg)] border-b border-[var(--ig-border)] z-30 transition-colors duration-300"
+      style={{ 
+        height: 'calc(68px + env(safe-area-inset-top))',
+        paddingTop: 'calc(12px + env(safe-area-inset-top))'
+      }}
+    >
       <div className="flex items-center gap-3 min-w-0">
         <button
           onClick={onBack}
