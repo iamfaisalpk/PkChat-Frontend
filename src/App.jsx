@@ -6,7 +6,8 @@ import {
 } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import ProtectedRoute from "./assets/Components/ProtectedRoute";
-import AppMain from "./assets/Pages/AppMain";
+const WhatsAppAuth = React.lazy(() => import("./assets/Components/WhatsAppAuth/WhatsAppAuth"));
+const AppMain = React.lazy(() => import("./assets/Pages/AppMain"));
 const ProfileSetup = React.lazy(() => import("./assets/Pages/ProfileSetup"));
 const UserProfile = React.lazy(() => import("./assets/Pages/UserProfile"));
 const Settings = React.lazy(() => import("./assets/Pages/Settings"));
@@ -14,7 +15,7 @@ const GroupInvitePreview = React.lazy(
   () => import("./assets/Pages/GroupInvitePreview"),
 );
 const ChatBox = React.lazy(() => import("./assets/Components/ChatBox/ChatBox"));
-import { setAuth } from "./assets/store/slices/authSlice";
+
 import useAuthManager from "./hooks/useAuthManager";
 import socket, { connectSocket } from "@/utils/socket";
 import {
@@ -23,7 +24,6 @@ import {
   messageDeleted,
 } from "./assets/store/slices/chatSlice";
 import { fetchChats, getBlockedUsers } from "@/utils/chatThunks";
-import WhatsAppAuth from "./assets/Components/WhatsAppAuth/WhatsAppAuth";
 import { Toaster } from "react-hot-toast";
 const ErrorPage = React.lazy(() => import("./assets/Pages/ErrorPage"));
 import SkeletonLoader from "./assets/Components/common/SkeletonLoader";

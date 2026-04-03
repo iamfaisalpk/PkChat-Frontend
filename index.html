@@ -11,17 +11,82 @@
       rel="stylesheet"
     />
     <title>PK.Chat | Modern Messaging</title>
-    <meta name="description" content="Secure, fast, and feature-rich real-time communication platform." />
-    <meta name="keywords" content="PK.Chat, messaging app, real-time chat, secure messaging" />
+    <meta
+      name="description"
+      content="Secure, fast, and feature-rich real-time communication platform."
+    />
+    <meta
+      name="keywords"
+      content="PK.Chat, messaging app, real-time chat, secure messaging"
+    />
     <meta property="og:title" content="PK.Chat | Modern Messaging" />
-    <meta property="og:description" content="Secure, fast, and feature-rich real-time communication platform." />
+    <meta
+      property="og:description"
+      content="Secure, fast, and feature-rich real-time communication platform."
+    />
     <meta property="og:image" content="/WhatsApp.svg.png" />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
-
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div
+        style="
+          height: 100vh;
+          width: 100vw;
+          background: #000;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          font-family: sans-serif;
+        "
+      >
+        <div
+          style="
+            width: 64px;
+            height: 64px;
+            background: #fff;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+          "
+        >
+          <img
+            src="/WhatsApp.svg.png"
+            style="width: 48px; height: 48px; object-fit: contain"
+          />
+        </div>
+        <div
+          style="
+            color: #fff;
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+          "
+        >
+          PK.<span style="color: #e1306c">Chat</span>
+        </div>
+        <style>
+          @keyframes pulse {
+            0%,
+            100% {
+              opacity: 1;
+              transform: scale(1);
+            }
+            50% {
+              opacity: 0.5;
+              transform: scale(0.95);
+            }
+          }
+          #root > div {
+            animation: pulse 1.5s ease-in-out infinite;
+          }
+        </style>
+      </div>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
