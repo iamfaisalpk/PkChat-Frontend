@@ -6,6 +6,7 @@ import {
   MessageSquarePlus,
   Settings,
   MessageSquare,
+  Archive,
 } from "lucide-react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useRef } from "react";
@@ -275,14 +276,16 @@ const AppMain = () => {
     { id: "Unread", label: "Unread" },
     { id: "Favorites", label: "Favorites" },
     { id: "Groups", label: "Groups" },
+    { id: "Archived", label: "Archived" },
   ];
 
   const sidebarIcons = [
-    { icon: MessageSquare, label: "Chats", route: "/app" },
+    { icon: MessageSquare, label: "Chats", route: "/app", action: () => { navigate("/app"); setActiveTab("All"); setActiveIcon("Chats"); } },
+    { icon: Archive, label: "Archived", action: () => { navigate("/app"); setActiveTab("Archived"); setActiveIcon("Archived"); } },
     {
       icon: Settings,
       label: "Settings",
-      action: () => navigate("/app/settings"),
+      action: () => { navigate("/app/settings"); setActiveIcon("Settings"); },
     },
   ];
 

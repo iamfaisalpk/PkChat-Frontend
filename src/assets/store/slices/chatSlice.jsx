@@ -475,8 +475,14 @@ const chatSlice = createSlice({
           isFavorite: Boolean(chat.isFavorite),
         });
 
-        state.chats = action.payload.activeChats.map(formatChat);
-        state.archivedChats = action.payload.archivedChats.map(formatChat);
+        state.chats = action.payload.activeChats.map((c) => ({
+          ...formatChat(c),
+          isArchived: false,
+        }));
+        state.archivedChats = action.payload.archivedChats.map((c) => ({
+          ...formatChat(c),
+          isArchived: true,
+        }));
 
         if (state.selectedChat) {
           const updatedSelectedChat =
@@ -656,10 +662,10 @@ const chatSlice = createSlice({
         const chatId = action.payload;
         const chat = state.chats.find((c) => c._id === chatId);
         if (chat) {
-          chat.muted = !chat.muted;
+          chat.isMuted = !chat.isMuted;
         }
         if (state.selectedChat && state.selectedChat._id === chatId) {
-          state.selectedChat.muted = !state.selectedChat.muted;
+          state.selectedChat.isMuted = !state.selectedChat.isMuted;
           localStorage.setItem(
             "selectedChat",
             JSON.stringify(state.selectedChat),

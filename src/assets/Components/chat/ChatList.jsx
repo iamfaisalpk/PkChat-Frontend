@@ -300,9 +300,18 @@ const ChatList = ({ activeTab }) => {
                       textOverflow: "ellipsis",
                       whiteSpace: "nowrap",
                       flex: 1,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
                     }}
                   >
                     {name}
+                    {chat.isMuted && (
+                      <VolumeX
+                        size={14}
+                        style={{ opacity: 0.4, flexShrink: 0 }}
+                      />
+                    )}
                   </h3>
                   <span
                     style={{
@@ -388,8 +397,12 @@ const ChatList = ({ activeTab }) => {
                   flexShrink: 0,
                 }}
                 className="chat-menu-btn"
-                onMouseEnter={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.8)")}
-                onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.4)")}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.color = "rgba(255,255,255,0.8)")
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.color = "rgba(255,255,255,0.4)")
+                }
               >
                 <ChevronDown size={20} />
               </button>
@@ -488,10 +501,9 @@ const ChatList = ({ activeTab }) => {
       </AnimatePresence>
 
       <style>{`
-        .chat-menu-btn { opacity: 0 !important; }
-        [style*="background: rgba(255,255,255,0.04)"] .chat-menu-btn,
-        [style*="background: rgba(255,255,255,0.07)"] .chat-menu-btn { opacity: 1 !important; }
-      `}</style>
+  .chat-menu-btn { opacity: 0.6; }
+  .chat-menu-btn:hover { opacity: 1; }
+`}</style>
     </div>
   );
 };
