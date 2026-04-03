@@ -112,6 +112,7 @@ const ChatList = ({ activeTab }) => {
     );
   };
 
+  
   const allChats = activeTab === "Archived" ? archivedChats : chats;
   const filteredChats = useMemo(() => {
     return allChats
