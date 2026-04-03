@@ -25,6 +25,7 @@ import {
   toggleArchiveChat,
   toggleFavorite,
   toggleMuteChat,
+  unblockUser,
 } from "@/utils/chatThunks";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -34,6 +35,7 @@ const ChatList = ({ activeTab }) => {
   const { chats, archivedChats, selectedChat } = useSelector((s) => s.chat);
   const { user } = useSelector((s) => s.auth);
   const [activeDropdown, setActiveDropdown] = useState(null);
+  const [chatToDelete, setChatToDelete] = useState(null);
   const dropdownRef = useRef(null);
 
   useEffect(() => {
@@ -158,12 +160,12 @@ const ChatList = ({ activeTab }) => {
       <AnimatePresence>
         {filteredChats.map((chat) => {
           // Stable user identification to prevent "User" labels on refresh
-          const currentUserId =
-            user?._id || JSON.parse(localStorage.getItem("user") || "{}")._id;
+          const currentUserId = user?._id || JSON.parse(localStorage.getItem("user") || "{}")._id;
+          
           const otherUser =
-            !chat.isGroup &&
+            !chat.isGroup && currentUserId &&
             chat.members?.find(
-              (m) => m && String(m._id) !== String(currentUserId),
+              (m) => m && String(m?._id) !== String(currentUserId),
             );
           const isBlocked =
             otherUser?.isBlockedByMe || otherUser?.isBlockedByThem;
@@ -176,7 +178,7 @@ const ChatList = ({ activeTab }) => {
             : otherUser?.savedName ||
               otherUser?.name ||
               otherUser?.phone ||
-              "User";
+              (currentUserId ? "Chat" : "...");
           const pic = chat.isGroup ? chat.groupAvatar : otherUser?.profilePic;
           const unread = chat.unreadCount || 0;
 
@@ -450,13 +452,18 @@ const ChatList = ({ activeTab }) => {
                         icon: <Archive size={15} />,
                         action: () => dispatch(toggleArchiveChat(chat._id)),
                       },
+                      chat.isBlockedByMe && {
+                        label: "Unblock",
+                        icon: <UserCircle size={15} />,
+                        action: () => dispatch(unblockUser(chat.participants?.find(p => p._id !== user?._id)?._id)),
+                      },
                       {
                         label: "Delete",
                         icon: <Trash2 size={15} />,
-                        action: () => dispatch(deleteChat(chat._id)),
+                        action: () => setChatToDelete(chat),
                         danger: true,
                       },
-                    ].map((item) => (
+                    ].filter(Boolean).map((item) => (
                       <button
                         key={item.label}
                         onClick={() => {
@@ -505,6 +512,130 @@ const ChatList = ({ activeTab }) => {
   .chat-menu-btn { opacity: 0.6; }
   .chat-menu-btn:hover { opacity: 1; }
 `}</style>
+      {/* ── Confirm Delete Modal ── */}
+      <AnimatePresence>
+        {chatToDelete && (
+          <div
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: "rgba(0,0,0,0.85)",
+              backdropFilter: "blur(4px)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 9999,
+              padding: "20px",
+            }}
+            onClick={() => setChatToDelete(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              style={{
+                width: "360px",
+                background: "#1a1a1a",
+                borderRadius: "24px",
+                padding: "24px",
+                textAlign: "center",
+                border: "1px solid rgba(255,255,255,0.1)",
+                boxShadow: "0 25px 50px -12px rgba(0,0,0,0.5)",
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div
+                style={{
+                  width: "60px",
+                  height: "60px",
+                  background: "rgba(255, 77, 109, 0.15)",
+                  borderRadius: "200px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  margin: "0 auto 16px",
+                }}
+              >
+                <Trash2 size={28} color="#ff4d6d" />
+              </div>
+              <h3
+                style={{
+                  color: "#fff",
+                  fontSize: "18px",
+                  fontWeight: 800,
+                  marginBottom: "8px",
+                }}
+              >
+                Delete this chat?
+              </h3>
+              <p
+                style={{
+                  color: "rgba(255,255,255,0.5)",
+                  fontSize: "14px",
+                  lineHeight: "1.5",
+                  marginBottom: "24px",
+                }}
+              >
+                This action is permanent. Are you sure you want to delete your conversation with{" "}
+                <span style={{ color: "#fff", fontWeight: 700 }}>
+                  {chatToDelete.groupName ||
+                    chatToDelete.participants?.find((p) => p._id !== user?._id)
+                      ?.name ||
+                    "this user"}
+                </span>
+                ?
+              </p>
+              <div
+                style={{ display: "flex", flexDirection: "column", gap: "8px" }}
+              >
+                <button
+                  onClick={() => {
+                    dispatch(deleteChat(chatToDelete._id));
+                    setChatToDelete(null);
+                  }}
+                  style={{
+                    background: "#ff4d6d",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: "14px",
+                    padding: "12px",
+                    fontSize: "14px",
+                    fontWeight: 800,
+                    cursor: "pointer",
+                    transition: "all 0.2s",
+                  }}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.filter = "brightness(1.1)")
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.filter = "brightness(1)")
+                  }
+                >
+                  Delete for everyone
+                </button>
+                <button
+                  onClick={() => setChatToDelete(null)}
+                  style={{
+                    background: "transparent",
+                    color: "rgba(255,255,255,0.8)",
+                    border: "none",
+                    borderRadius: "14px",
+                    padding: "12px",
+                    fontSize: "14px",
+                    fontWeight: 700,
+                    cursor: "pointer",
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

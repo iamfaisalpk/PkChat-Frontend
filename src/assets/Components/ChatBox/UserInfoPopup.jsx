@@ -91,20 +91,33 @@ const UserInfoPopup = ({ user, onClose }) => {
     }
   };
 
+  const [showBlockModal, setShowBlockModal] = useState(false);
+
   const handleBlockToggle = async () => {
     if (!user?._id) return;
     if (loading) return;
-    setLoading(true);
-    try {
-      if (isBlocked) {
+    
+    if (isBlocked) {
+      setLoading(true);
+      try {
         await dispatch(unblockUser(user._id)).unwrap();
         toast.success("User unblocked");
-      } else {
-        if (!window.confirm(`Are you sure you want to block ${user.name}?`))
-          return;
-        await dispatch(blockUser(user._id)).unwrap();
-        toast.success("User blocked");
+      } catch (err) {
+        toast.error(err || "Action failed");
+      } finally {
+        setLoading(false);
       }
+    } else {
+      setShowBlockModal(true);
+    }
+  };
+
+  const confirmBlock = async () => {
+    setShowBlockModal(false);
+    setLoading(true);
+    try {
+      await dispatch(blockUser(user._id)).unwrap();
+      toast.success("User blocked successfully");
     } catch (err) {
       toast.error(err || "Action failed");
     } finally {
@@ -337,6 +350,47 @@ const UserInfoPopup = ({ user, onClose }) => {
           </button>
         </div>
       </div>
+      {/* Block Confirmation Modal */}
+      <AnimatePresence>
+        {showBlockModal && (
+          <div
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+            onClick={() => setShowBlockModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="w-full max-w-sm bg-[#1a1a1a] rounded-[28px] p-8 text-center border border-white/10 shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="w-16 h-16 bg-red-500/10 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                <AlertTriangle size={32} className="text-red-500" />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-2">
+                Block {user.name}?
+              </h3>
+              <p className="text-sm text-white/50 leading-relaxed mb-8">
+                Blocked contacts will no longer be able to call you or send you messages. This contact will not be notified.
+              </p>
+              <div className="flex flex-col gap-3">
+                <button
+                  onClick={confirmBlock}
+                  className="w-full py-4 bg-red-500 hover:bg-red-600 text-white rounded-2xl font-bold transition-colors cursor-pointer"
+                >
+                  Block
+                </button>
+                <button
+                  onClick={() => setShowBlockModal(false)}
+                  className="w-full py-4 bg-white/5 hover:bg-white/10 text-white rounded-2xl font-bold transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

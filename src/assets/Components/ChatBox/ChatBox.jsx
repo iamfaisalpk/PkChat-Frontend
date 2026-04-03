@@ -138,9 +138,8 @@ const ChatBox = () => {
   }, [messages, searchText]);
 
   const otherUser = useMemo(() => {
-    if (!selectedChat?.isGroup && selectedChat?.members) {
-      const currentUserId =
-        user?._id || JSON.parse(localStorage.getItem("user") || "{}")._id;
+    const currentUserId = user?._id || JSON.parse(localStorage.getItem("user") || "{}")._id;
+    if (!selectedChat?.isGroup && selectedChat?.members && currentUserId) {
       return selectedChat.members.find(
         (m) => m && String(m._id) !== String(currentUserId),
       );

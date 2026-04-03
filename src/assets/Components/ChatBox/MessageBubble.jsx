@@ -425,7 +425,35 @@ const MessageBubble = forwardRef((props, ref) => {
                 color: "#fff",
               }}
             >
-              {msg.text}
+              {msg.text.split(/(\s+)/).map((part, i) => {
+                const urlRegex = /(https?:\/\/[^\s]+|www\.[^\s]+|[a-zA-Z0-9.-]+\.[a-z]{2,})/g;
+                if (part.match(urlRegex)) {
+                  const href = part.startsWith("http") ? part : `https://${part}`;
+                  return (
+                    <a
+                      key={i}
+                      href={href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="message-link"
+                      style={{
+                        color: isOwn ? "#fff" : "#3797f0",
+                        textDecoration: "underline",
+                        cursor: "pointer",
+                        fontWeight: 700,
+                        wordBreak: "break-all",
+                        transition: "opacity 0.2s",
+                      }}
+                      onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.7")}
+                      onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {part}
+                    </a>
+                  );
+                }
+                return part;
+              })}
             </p>
           )}
 
@@ -636,7 +664,7 @@ const MessageBubble = forwardRef((props, ref) => {
                 >
                   <CornerUpLeft size={13} /> Reply
                 </button>
-                {isOwn && msg._id && (
+                {(isOwn || (otherUser?.isGroup && otherUser.groupAdmin?._id === user?._id)) && msg._id && (
                   <button
                     onClick={() => {
                       onDelete(msg._id, true);

@@ -123,6 +123,44 @@ const GroupInfoPopup = ({ chat, onClose, onUpdate }) => {
     }
   };
 
+  const [userToKick, setUserToKick] = useState(null);
+
+  const handleRemoveMember = async (memberId) => {
+    const member = chat.members.find(m => m?._id === memberId);
+    if (memberId === chat.groupAdmin?._id) return toast.error("Admin cannot be removed");
+    setUserToKick(member);
+  };
+
+  const confirmKick = async () => {
+    if (!userToKick) return;
+    setIsLoading(true);
+    try {
+      await axios.put("/api/chat/group-remove", { chatId: chat._id, userId: userToKick._id });
+      dispatch(fetchChats());
+      toast.success(`${userToKick.name} removed`);
+      setUserToKick(null);
+    } catch (err) {
+      toast.error("Failed to remove member");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleUpdateDescription = async () => {
+    const newDesc = prompt("Edit Group Description:", chat.groupDescription);
+    if (newDesc === null || newDesc === chat.groupDescription) return;
+    setIsLoading(true);
+    try {
+      await axios.put(`/api/chat/update-description/${chat._id}`, { description: newDesc });
+      dispatch(fetchChats());
+      toast.success("Description updated");
+    } catch (err) {
+      toast.error("Update failed");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleToggleMute = async () => {
     try {
       await dispatch(toggleMuteChat(chat._id)).unwrap();
@@ -209,9 +247,9 @@ const GroupInfoPopup = ({ chat, onClose, onUpdate }) => {
 
   const handleShareLink = () => {
     if (chat.inviteToken) {
-      const link = `${window.location.origin}/join/${chat.inviteToken}`;
+      const link = `${window.location.origin}/preview/${chat.inviteToken}`;
       navigator.clipboard.writeText(link);
-      toast.success("Invite link copied to clipboard!");
+      toast.success("Link copied! Share it with others to join.");
     } else {
       toast.error("Invite token not found");
     }
@@ -370,6 +408,7 @@ const GroupInfoPopup = ({ chat, onClose, onUpdate }) => {
             {isGroupAdmin && (
               <Edit3
                 size={14}
+                onClick={handleUpdateDescription}
                 className="text-[var(--ig-text-secondary)] cursor-pointer hover:text-[var(--ig-text-primary)]"
               />
             )}
@@ -423,6 +462,17 @@ const GroupInfoPopup = ({ chat, onClose, onUpdate }) => {
                     {member?.about || "I am using PK.Chat"}
                   </p>
                 </div>
+                {isGroupAdmin && member?._id !== currentUser?._id && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRemoveMember(member._id);
+                    }}
+                    className="p-1 px-2 text-[10px] font-bold text-red-500 hover:bg-red-500/10 rounded-md transition-all uppercase"
+                  >
+                    Remove
+                  </button>
+                )}
               </div>
             ))}
           </div>
@@ -461,9 +511,52 @@ const GroupInfoPopup = ({ chat, onClose, onUpdate }) => {
         <InviteModal
           chatId={chat._id}
           inviteToken={chat.inviteToken}
+          groupMembers={chat.members}
           onClose={() => setShowInviteModal(false)}
         />
       )}
+
+      {/* Kick Member Confirmation Modal */}
+      <AnimatePresence>
+        {userToKick && (
+          <div
+            className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+            onClick={() => setUserToKick(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="w-full max-w-sm bg-[#1a1a1a] rounded-[32px] p-8 text-center border border-white/10 shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="w-16 h-16 bg-red-500/10 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                <Users size={32} className="text-red-500" />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-2">
+                Remove {userToKick.name}?
+              </h3>
+              <p className="text-sm text-white/50 leading-relaxed mb-8">
+                Are you sure you want to remove this member from the group? They can be added back later by an admin.
+              </p>
+              <div className="flex flex-col gap-3">
+                <button
+                  onClick={confirmKick}
+                  className="w-full py-4 bg-red-500 hover:bg-red-600 text-white rounded-2xl font-bold transition-colors cursor-pointer"
+                >
+                  Remove Member
+                </button>
+                <button
+                  onClick={() => setUserToKick(null)}
+                  className="w-full py-4 bg-white/5 hover:bg-white/10 text-white rounded-2xl font-bold transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

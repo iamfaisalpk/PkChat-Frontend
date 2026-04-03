@@ -672,8 +672,8 @@ const chatSlice = createSlice({
           );
         }
       })
-      .addCase(toggleArchiveChat.fulfilled, (state, action) => {
-        const chatId = action.payload;
+      .addCase(toggleArchiveChat.pending, (state, action) => {
+        const chatId = action.meta.arg;
 
         const archivedIndex = state.archivedChats.findIndex(
           (c) => c._id === chatId,
@@ -698,6 +698,9 @@ const chatSlice = createSlice({
             JSON.stringify(state.selectedChat),
           );
         }
+      })
+      .addCase(toggleArchiveChat.rejected, (state, action) => {
+        state.error = action.payload || "Failed to toggle archive";
       })
 
       .addCase(togglePinChat.fulfilled, (state, action) => {

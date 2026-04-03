@@ -95,7 +95,12 @@ const App = () => {
           }),
         );
       };
-      const handleChatListUpdated = () => dispatch(fetchChats());
+      const handleChatListUpdated = (data) => {
+        // Only fetch if it's not a local action we already handled (to prevent state overwrite flip-flop)
+        if (data?.action !== 'archive' && data?.action !== 'unarchive') {
+          dispatch(fetchChats());
+        }
+      };
       const handleBlockStatusUpdated = () => dispatch(getBlockedUsers());
       const handleGroupDescriptionUpdated = () => dispatch(fetchChats());
       const handleUserStatus = (data) => dispatch(updateUserStatus(data));

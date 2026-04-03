@@ -15,8 +15,9 @@ import instance from "../../Services/axiosInstance";
 import ChatSearch from "../chat/ChatSearch";
 import socket from "@/utils/socket";
 import { toggleGroupInfo, toggleUserInfo } from "../../store/slices/uiSlice";
-import { fetchChats } from "@/utils/chatThunks";
+import { fetchChats, unblockUser } from "@/utils/chatThunks";
 import { setSelectedChat } from "../../store/slices/chatSlice";
+import { UserCircle } from "lucide-react";
 
 const ChatHeader = ({
   otherUser,
@@ -29,7 +30,7 @@ const ChatHeader = ({
   const { selectedChat } = useSelector((s) => s.chat);
   const isGroup = selectedChat?.isGroup;
 
-  const title = isGroup ? selectedChat.groupName : otherUser?.name || "User";
+  const title = isGroup ? selectedChat.groupName : otherUser?.name || "Chat";
   const avatar = isGroup ? selectedChat.groupAvatar : otherUser?.profilePic;
   const isOnline = !isGroup && otherUser?.isOnline;
 
@@ -111,6 +112,18 @@ const ChatHeader = ({
       </div>
 
       <div className="flex items-center gap-2 sm:gap-4">
+        {otherUser?.isBlockedByMe && (
+          <button
+            onClick={() => {
+              if (window.confirm(`Unblock ${otherUser.name}?`)) {
+                dispatch(unblockUser(otherUser._id));
+              }
+            }}
+            className="flex items-center gap-2 px-3 py-1.5 bg-green-500/10 text-green-500 hover:bg-green-500/20 rounded-lg text-[10px] font-bold transition-all border border-green-500/20"
+          >
+            <UserCircle size={14} /> UNBLOCK
+          </button>
+        )}
         <button className="p-2 text-[var(--ig-text-primary)] hover:bg-[var(--ig-secondary-bg)] rounded-full transition-all hidden sm:block">
           <Phone size={22} strokeWidth={2} />
         </button>
